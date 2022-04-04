@@ -6,16 +6,10 @@
 
 https://go.dev/doc/install
 
-### Fetch the code
+### Install the CLI
 
 ```
-git clone https://github.com/spreeloop/asana-to-github.git
-```
-
-### Build
-
-```
-go build
+go install spreeloop.com/asana-to-github
 ```
 
 ### Usage
