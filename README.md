@@ -1,4 +1,4 @@
-[![coveralls](https://coveralls.io/repos/github/spreeloop/asana-to-github/badge.svg?branch=master)](https://coveralls.io/repos/github/spreeloop/asana-to-github)
+[![coveralls](https://coveralls.io/repos/github/spreeloop/asana-to-github/badge.svg?branch=master)](https://coveralls.io/github/spreeloop/asana-to-github)
 
 # Migrate tasks from Asana to Github
 
