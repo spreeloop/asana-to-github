@@ -1,9 +1,6 @@
 package asana_test
 
 import (
-	"fmt"
-	"io/ioutil"
-	"os"
 	"testing"
 
 	"spreeloop.com/asana-to-github/asana"
@@ -11,14 +8,7 @@ import (
 
 func TestParseEmptyJson(t *testing.T) {
 	source := "testdata/empty.json"
-	f, err := os.Open(source)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer f.Close()
-
-	data, _ := ioutil.ReadAll(f)
-	tasks, err := asana.ParseJSON(data)
+	tasks, err := asana.ParseFileJSON(source)
 	if err != nil {
 		t.Fatal("ParseJSON returned an error:", err)
 	}
@@ -31,14 +21,7 @@ func TestParseEmptyJson(t *testing.T) {
 
 func TestParseTaskWithoutSubtasks(t *testing.T) {
 	source := "testdata/tasks_without_subtasks.json"
-	f, err := os.Open(source)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer f.Close()
-
-	data, _ := ioutil.ReadAll(f)
-	tasks, err := asana.ParseJSON(data)
+	tasks, err := asana.ParseFileJSON(source)
 	if err != nil {
 		t.Fatal("ParseJSON returned an error:", err)
 	}
@@ -56,14 +39,7 @@ func TestParseTaskWithoutSubtasks(t *testing.T) {
 
 func TestParseTaskWithSubtasks(t *testing.T) {
 	source := "testdata/tasks_with_subtasks.json"
-	f, err := os.Open(source)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer f.Close()
-
-	data, _ := ioutil.ReadAll(f)
-	tasks, err := asana.ParseJSON(data)
+	tasks, err := asana.ParseFileJSON(source)
 	if err != nil {
 		t.Fatal("ParseJSON returned an error:", err)
 	}
@@ -75,7 +51,16 @@ func TestParseTaskWithSubtasks(t *testing.T) {
 }
 
 func TestParseBrokenJson(t *testing.T) {
-	_, err := asana.ParseJSON([]byte("bad data"))
+	source := "testdata/bad_data.json"
+	_, err := asana.ParseFileJSON(source)
+	if err == nil {
+		t.Errorf("got nil error; want non-nil error")
+	}
+}
+
+func TestParseNonExistingFile(t *testing.T) {
+	source := "testdata/non_existing_file.json"
+	_, err := asana.ParseFileJSON(source)
 	if err == nil {
 		t.Errorf("got nil error; want non-nil error")
 	}
