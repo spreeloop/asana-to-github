@@ -2,6 +2,8 @@ package asana
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"os"
 )
 
 type Assignee struct {
@@ -82,7 +84,7 @@ type Task struct {
 	NumHearts       int `json:"num_hearts"`
 	NumLikes        int `json:"num_likes"`
 	Parent          Parent
-	PermalinkUrl    string `json:"permalink_url"`
+	PermalinkURL    string `json:"permalink_url"`
 	Projects        []Project
 	ResourceType    string `json:"resource_type"`
 	StartAt         string `json:"start_at"`
@@ -96,8 +98,7 @@ type root struct {
 	Data []Task
 }
 
-// ParseJSON unmarshals asana tasks in JSON format.
-func ParseJSON(data []byte) ([]Task, error) {
+func parseJSON(data []byte) ([]Task, error) {
 	var r root
 	err := json.Unmarshal(data, &r)
 	if err != nil {
@@ -113,4 +114,20 @@ func ParseJSON(data []byte) ([]Task, error) {
 	}
 
 	return append(tasks, subTasks...), nil
+}
+
+// ParseJSONFile unmarshals asana tasks in JSON format.
+func ParseFileJSON(source string) ([]Task, error) {
+	f, err := os.Open(source)
+	if err != nil {
+		return []Task{}, err
+	}
+	defer f.Close()
+
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		return []Task{}, err
+	}
+
+	return parseJSON(data)
 }
