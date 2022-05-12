@@ -5,11 +5,12 @@ import (
 	"testing"
 
 	"spreeloop.com/asana-to-github/asana"
+	"spreeloop.com/asana-to-github/fake"
 )
 
 func TestParseEmptyJson(t *testing.T) {
 	source := "testdata/empty.json"
-	client := asana.NewFake(source)
+	client := fake.NewAsanaClient(source)
 	tasks, err := asana.FetchTasks(context.Background(), client, "dummy-project-id")
 	if err != nil {
 		t.Fatal("ParseJSON returned an error:", err)
@@ -23,7 +24,7 @@ func TestParseEmptyJson(t *testing.T) {
 
 func TestParseTaskWithoutSubtasks(t *testing.T) {
 	source := "testdata/tasks_without_subtasks.json"
-	client := asana.NewFake(source)
+	client := fake.NewAsanaClient(source)
 	tasks, err := asana.FetchTasks(context.Background(), client, "dummy-project-id")
 	if err != nil {
 		t.Fatal("ParseJSON returned an error:", err)
@@ -42,7 +43,7 @@ func TestParseTaskWithoutSubtasks(t *testing.T) {
 
 func TestParseTaskWithSubtasks(t *testing.T) {
 	source := "testdata/tasks_with_subtasks.json"
-	client := asana.NewFake(source)
+	client := fake.NewAsanaClient(source)
 	tasks, err := asana.FetchTasks(context.Background(), client, "dummy-project-id")
 	if err != nil {
 		t.Fatal("ParseJSON returned an error:", err)
@@ -56,7 +57,7 @@ func TestParseTaskWithSubtasks(t *testing.T) {
 
 func TestParseBrokenJson(t *testing.T) {
 	source := "testdata/bad_data.json"
-	client := asana.NewFake(source)
+	client := fake.NewAsanaClient(source)
 	_, err := asana.FetchTasks(context.Background(), client, "dummy-project-id")
 	if err == nil {
 		t.Errorf("got nil error; want non-nil error")
@@ -65,7 +66,7 @@ func TestParseBrokenJson(t *testing.T) {
 
 func TestParseNonExistingFile(t *testing.T) {
 	source := "testdata/non_existing_file.json"
-	client := asana.NewFake(source)
+	client := fake.NewAsanaClient(source)
 	_, err := asana.FetchTasks(context.Background(), client, "dummy-project-id")
 	if err == nil {
 		t.Errorf("got nil error; want non-nil error")

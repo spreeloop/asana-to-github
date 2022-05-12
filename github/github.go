@@ -8,17 +8,15 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type githubClientInterface interface {
-	createIssueInternal(ctx context.Context, org string, repo string, issue *github.IssueRequest) (*github.Issue, *github.Response, error)
+type GithubInterface interface {
+	createIssueImplementation(ctx context.Context, org string, repo string, issue *github.IssueRequest) (*github.Issue, *github.Response, error)
 }
 
 type githubClient struct {
 	client *github.Client
 }
 
-type fakeGithubClient struct{}
-
-func New(ctx context.Context, token string) githubClientInterface {
+func New(ctx context.Context, token string) GithubInterface {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
@@ -27,20 +25,11 @@ func New(ctx context.Context, token string) githubClientInterface {
 	return client
 }
 
-func NewFake() githubClientInterface {
-	return fakeGithubClient{}
-}
-
-func (c githubClient) createIssueInternal(ctx context.Context, org string, repo string, issue *github.IssueRequest) (*github.Issue, *github.Response, error) {
+func (c githubClient) createIssueImplementation(ctx context.Context, org string, repo string, issue *github.IssueRequest) (*github.Issue, *github.Response, error) {
 	return c.client.Issues.Create(ctx, org, repo, issue)
 }
 
-func (c fakeGithubClient) createIssueInternal(ctx context.Context, org string, repo string, issue *github.IssueRequest) (*github.Issue, *github.Response, error) {
-	fmt.Printf("%v/%v title: %s, body: %s, labels: %v, state: %s\n", org, repo, *issue.Title, *issue.Body, *issue.Labels, *issue.State)
-	return nil, nil, nil
-}
-
-func CreateIssue(ctx context.Context, client githubClientInterface, org string, repo string, title string, body string, labels []string, completed bool) error {
+func CreateIssue(ctx context.Context, client GithubInterface, org string, repo string, title string, body string, labels []string, completed bool) error {
 	if title == "" {
 		return fmt.Errorf("empty title field")
 	}
@@ -58,7 +47,7 @@ func CreateIssue(ctx context.Context, client githubClientInterface, org string, 
 		State:  &state,
 	}
 
-	_, _, err := client.createIssueInternal(ctx, org, repo, &req)
+	_, _, err := client.createIssueImplementation(ctx, org, repo, &req)
 	if err != nil {
 		return err
 	}
