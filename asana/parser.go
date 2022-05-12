@@ -2,8 +2,6 @@ package asana
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"os"
 )
 
 type Assignee struct {
@@ -98,7 +96,8 @@ type root struct {
 	Data []Task
 }
 
-func parseJSON(data []byte) ([]Task, error) {
+// ParseJSON unmarshals asana tasks from bytes in JSON format.
+func ParseJSON(data []byte) ([]Task, error) {
 	var r root
 	err := json.Unmarshal(data, &r)
 	if err != nil {
@@ -114,20 +113,4 @@ func parseJSON(data []byte) ([]Task, error) {
 	}
 
 	return append(tasks, subTasks...), nil
-}
-
-// ParseJSONFile unmarshals asana tasks in JSON format.
-func ParseFileJSON(source string) ([]Task, error) {
-	f, err := os.Open(source)
-	if err != nil {
-		return []Task{}, err
-	}
-	defer f.Close()
-
-	data, err := ioutil.ReadAll(f)
-	if err != nil {
-		return []Task{}, err
-	}
-
-	return parseJSON(data)
 }
