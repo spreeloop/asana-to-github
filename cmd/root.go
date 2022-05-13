@@ -44,6 +44,16 @@ var (
 				fmt.Printf("failed to retrieve asana tasks: %v\n", err)
 				return
 			}
+			uniqueTasks := make(map[string]asana.Task)
+			numEmptyTask := 0
+			for _, task := range tasks {
+				if task.Name == "" {
+					numEmptyTask++
+				}
+				uniqueTasks[task.Name] = task
+			}
+			fmt.Printf("found %v empty tasks out of %v tasks\n", numEmptyTask, len(tasks))
+			fmt.Printf("found %v unique tasks out of %v tasks\n", len(uniqueTasks), len(tasks))
 
 			githubClient := github.NewFake()
 			if !dryRun {
@@ -56,10 +66,12 @@ var (
 				return
 			}
 
+			count := 0
 			successCount := 0
 			completedStateCount := 0
-			for i, t := range tasks {
-				fmt.Printf("i: %v\n", i)
+			for _, t := range uniqueTasks {
+				fmt.Printf("i: %v\n", count)
+				count++
 
 				labels := []string{}
 				for _, tag := range t.Tags {
@@ -78,8 +90,8 @@ var (
 				successCount++
 			}
 
-			fmt.Printf("Successfully migrated %v out of %v tasks\n", successCount, len(tasks))
-			fmt.Printf("%v out of %v tasks are closed\n", completedStateCount, len(tasks))
+			fmt.Printf("Successfully migrated %v out of %v unique tasks\n", successCount, len(uniqueTasks))
+			fmt.Printf("%v out of %v unique tasks are closed\n", completedStateCount, len(uniqueTasks))
 		},
 	}
 )

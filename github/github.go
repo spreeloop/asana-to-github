@@ -63,7 +63,6 @@ func MigrateIssue(ctx context.Context, client GithubInterface, migratedIssues ma
 		state = stateClosed
 	}
 
-	fmt.Printf("Creating %q, body: %s, labels: %v, state: %s\n", title, body, labels, state)
 	bodyWithPermalink := fmt.Sprintf("%s\n\n%s", permalink, body)
 	if body == "" {
 		bodyWithPermalink = permalink
@@ -97,6 +96,7 @@ func MigrateIssue(ctx context.Context, client GithubInterface, migratedIssues ma
 	nonEmptyLabels = append(nonEmptyLabels, labelMigration)
 
 	// Create a new issue, since it doesn't exist in github yet.
+	fmt.Printf("Creating %q, bodyWithPermalink: %s, labels: %v, state: %s\n", title, bodyWithPermalink, labels, state)
 	req := github.IssueRequest{
 		Title:  &title,
 		Body:   &bodyWithPermalink,
@@ -155,7 +155,7 @@ func ListMigratedIssues(ctx context.Context, write GithubInterface, token string
 		}
 
 		// Tag duplicates that occur during the migration and close them.
-		if dup, isDup := migratedIssues[title]; isDup {
+		if _, isDup := migratedIssues[title]; isDup {
 			state := stateClosed
 			updateRequest := &github.IssueRequest{
 				State:  &state,
@@ -164,7 +164,10 @@ func ListMigratedIssues(ctx context.Context, write GithubInterface, token string
 
 			numDups++
 			fmt.Printf("closing duplicated %q\n", title)
-			write.updateIssue(ctx, dup, org, repo, updateRequest)
+			_, _, err := write.updateIssue(ctx, issue, org, repo, updateRequest)
+			if err != nil {
+				fmt.Printf("failed to update duplicated issue %q\n", title)
+			}
 			continue
 		}
 
